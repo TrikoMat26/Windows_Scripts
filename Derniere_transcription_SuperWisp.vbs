@@ -9,7 +9,8 @@ Dim newestDate
 
 ' Configure the target folder path here
 ' Example: targetFolderPath = "C:\\Users\\John\\Documents"
-targetFolderPath = InputBox("Entrez le chemin du dossier cible :", "Chemin du dossier")
+' targetFolderPath = InputBox("Entrez le chemin du dossier cible :", "Chemin du dossier")
+targetFolderPath = "C:\Users\kriko\AppData\Local\com.superwhisper.app\recordings"
 
 If Len(Trim(targetFolderPath)) = 0 Then
     WScript.Echo "Aucun chemin fourni. Script interrompu."
@@ -43,4 +44,4 @@ Dim shell
 Set shell = CreateObject("WScript.Shell")
 shell.Run "explorer.exe """ & newestSubFolder.Path & """", 1, False
 
-WScript.Echo "Dernier sous-dossier ouvert : " & newestSubFolder.Path
+'WScript.Echo "Dernier sous-dossier ouvert : " & newestSubFolder.Path
