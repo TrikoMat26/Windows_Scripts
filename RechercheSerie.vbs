@@ -30,6 +30,7 @@ For Each serial In serials
                 WScript.Echo "Analyse du fichier : " & logfile.Name
                 Set objFile = objFSO.OpenTextFile(logfile.Path, 1)
                 collecting = False
+                found = False
                 lineNumber = 0
                 Do Until objFile.AtEndOfStream
                     line = objFile.ReadLine
@@ -63,6 +64,28 @@ For Each serial In serials
                         End If
                     ElseIf collecting Then
                         result = result & vbCrLf & line
+                            WScript.Echo "Ligne " & lineNumber & " : Datamatrix avec numéro " & sn
+                            If sn = serial Then
+                                WScript.Echo "--> Numéro correspondant trouvé"
+                                If result <> "" Then result = result & vbCrLf
+                                result = result & line
+                                found = True
+                                foundMatches = foundMatches + 1
+                                ' Ajouter les lignes suivantes jusqu'à la prochaine ligne "Datamatrix"
+                                Do Until objFile.AtEndOfStream
+                                    l2 = objFile.ReadLine
+                                    lineNumber = lineNumber + 1
+                                    If InStr(l2, "Datamatrix") > 0 Then
+                                        WScript.Echo "Ligne " & lineNumber & " : Nouveau bloc Datamatrix, arrêt de la capture"
+                                        objFile.SkipLine  ' revenir sur la ligne "Datamatrix" à la prochaine itération
+                                        Exit Do
+                                    End If
+                                    result = result & vbCrLf & l2
+                                Loop
+                            End If
+                        Else
+                            WScript.Echo "Ligne " & lineNumber & " : Datamatrix mal formé (moins de 3 éléments)"
+                        End If
                     End If
                 Loop
                 objFile.Close
