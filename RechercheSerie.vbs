@@ -29,6 +29,7 @@ For Each serial In serials
             If LCase(Left(logfile.Name, 15)) = "elisa_prod_log" Then
                 WScript.Echo "Analyse du fichier : " & logfile.Name
                 Set objFile = objFSO.OpenTextFile(logfile.Path, 1)
+                collecting = False
                 found = False
                 lineNumber = 0
                 Do Until objFile.AtEndOfStream
@@ -38,6 +39,31 @@ For Each serial In serials
                         tmp = Split(line, "#")
                         If UBound(tmp) >= 2 Then
                             sn = Trim(tmp(2))
+                            sn = Replace(sn, "=", "")
+                            sn = Replace(sn, " ", "")
+                            If InStr(sn, "\t") > 0 Then sn = Replace(sn, "\t", "")
+                            WScript.Echo "Ligne " & lineNumber & " : Datamatrix avec numéro " & sn
+                            If sn = serial Then
+                                If collecting = False Then
+                                    foundMatches = foundMatches + 1
+                                    If result <> "" Then result = result & vbCrLf
+                                End If
+                                collecting = True
+                                WScript.Echo "--> Numéro correspondant trouvé"
+                                If result <> "" And Right(result, 2) <> vbCrLf Then
+                                    result = result & vbCrLf
+                                End If
+                                result = result & line
+                            Else
+                                If collecting Then WScript.Echo "Ligne " & lineNumber & " : Fin du bloc pour " & serial
+                                collecting = False
+                            End If
+                        Else
+                            WScript.Echo "Ligne " & lineNumber & " : Datamatrix mal formé (moins de 3 éléments)"
+                            collecting = False
+                        End If
+                    ElseIf collecting Then
+                        result = result & vbCrLf & line
                             WScript.Echo "Ligne " & lineNumber & " : Datamatrix avec numéro " & sn
                             If sn = serial Then
                                 WScript.Echo "--> Numéro correspondant trouvé"
